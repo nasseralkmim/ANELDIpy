@@ -131,6 +131,7 @@ class Matrices:
                 self.P0q[6, e] += load[0]*mesh.phi[3]*mesh.detJac
                 self.P0q[7, e] += load[1]*mesh.phi[3]*mesh.detJac
 
+                
     def mass(self, material):
         """Build the elemental  mass matrix 8x8
 
@@ -141,276 +142,29 @@ class Matrices:
         for surf, mat in material.items():
             rho = mat[2]
 
+            for e in range(mesh.num_ele):
+                if surf == mesh.ele_surface[e, 1]:
+                    for w in range(4):
+                        mesh.basisFunction2D(self.gp[w])
+                        mesh.eleJacobian(mesh.nodes_coord[
+                            mesh.ele_conn[e, :]])
+
+                        if mesh.detJac <= 0.0:
+                            print('Error: non-positive Jacobian - '
+                                  'check element nodes numbering')
+                            print('Element', e)
+
+                        n = mesh.phi
+
+                        N = np.array([
+                            [n[0], 0., n[1], 0., n[2], 0., n[3], 0.],
+                            [0., n[0], 0., n[1], 0., n[2], 0., n[3]]
+                        ])
+
+                        Jac = mesh.detJac
+                        self.M[;, ;, e] += np.dot(np.transpose(N), N) * rho * Jac
         
         
                 
 
-    def strain_initial(self, U0):
-        """
-
-        :param nu:
-        :param E:
-        :return:
-        """
-        mesh = self.mesh
-
-        self.P0e = np.zeros((8, mesh.num_ele))
-
-        self.u0 = np.zeros((8, mesh.num_ele))
-
-        self.e0 = np.zeros((3, mesh.num_ele))
-
-        # create u0 for each element based on nodal displacement
-        for key in U0(1, 1).keys():
-            if key[0] == 'nodes' or key[0] == 'node':
-                for n in key[1:]:
-                    for e in range(mesh.num_ele):
-                        if n in mesh.ele_conn[e]:
-
-                            # find node index within element
-                            i = np.where(mesh.ele_conn[e]==n)[0][0]
-
-                            x = mesh.nodes_coord[mesh.ele_conn[e, i], 0]
-                            y = mesh.nodes_coord[mesh.ele_conn[e, i], 1]
-
-                            u = U0(x, y)
-
-                            self.u0[2*i, e] = u[key][0]
-                            self.u0[2*i+1, e] = u[key][1]
-
-        #compute element node force due initial displacement
-        for e in range(mesh.num_ele):
-            for w in range(4):
-                mesh.basisFunction2D(self.gp[w])
-                mesh.eleJacobian(mesh.nodes_coord[
-                    mesh.ele_conn[e, :]])
-
-                B = np.array([
-                    [mesh.dphi_xi[0, 0], 0, mesh.dphi_xi[0, 1], 0,
-                    mesh.dphi_xi[0, 2], 0, mesh.dphi_xi[0, 3], 0]
-                             ,
-                    [0, mesh.dphi_xi[1, 0], 0, mesh.dphi_xi[1, 1], 0,
-                    mesh.dphi_xi[1, 2], 0, mesh.dphi_xi[1, 3]]
-                             ,
-                    [mesh.dphi_xi[1, 0], mesh.dphi_xi[0, 0],
-                    mesh.dphi_xi[1, 1], mesh.dphi_xi[0, 1],
-                    mesh.dphi_xi[1, 2], mesh.dphi_xi[0, 2],
-                    mesh.dphi_xi[1, 3], mesh.dphi_xi[0, 3]]])
-
-                e0 = np.dot(B, self.u0[:, e])
-
-                self.e0[:, e] += e0
-
-                s0 = np.dot(self.C, e0)
-
-                self.P0e[:, e] += np.dot(np.transpose(B), s0)*mesh.detJac
-
-
-    def stress_initial(self, stress0):
-        """
-
-        :param nu:
-        :param E:
-        :return:
-        """
-        mesh = self.mesh
-        self.P0s = np.zeros((8, mesh.num_ele))
-
-        for e in range(mesh.num_ele):
-            for w in range(4):
-                mesh.basisFunction2D(self.gp[w])
-                mesh.eleJacobian(mesh.nodes_coord[
-                    mesh.ele_conn[e, :]])
-
-                D = np.array([
-                    [mesh.dphi_xi[0, 0], 0, mesh.dphi_xi[0, 1], 0,
-                    mesh.dphi_xi[0, 2], 0, mesh.dphi_xi[0, 3], 0]
-                             ,
-                    [0, mesh.dphi_xi[1, 0], 0, mesh.dphi_xi[1, 1], 0,
-                    mesh.dphi_xi[1, 2], 0, mesh.dphi_xi[1, 3]]
-                             ,
-                    [mesh.dphi_xi[1, 0], mesh.dphi_xi[0, 0],
-                    mesh.dphi_xi[1, 1], mesh.dphi_xi[0, 1],
-                    mesh.dphi_xi[1, 2], mesh.dphi_xi[0, 2],
-                    mesh.dphi_xi[1, 3], mesh.dphi_xi[0, 3]]])
-
-                self.P0s[:, e] += np.dot(np.transpose(D), stress0)*mesh.detJac
-
-
-
-    def nodal_forces(self, U):
-        """
-
-        :param U:
-        :return:
-        """
-        mesh = self.mesh
-        self.pEle = np.zeros((8, mesh.num_ele))
-        for e in range(mesh.num_ele):
-            uEle = np.array([
-                    U[2*mesh.ele_conn[e, 0]],
-                    U[2*mesh.ele_conn[e, 0]+1],
-                    U[2*mesh.ele_conn[e, 1]],
-                    U[2*mesh.ele_conn[e, 1]+1],
-                    U[2*mesh.ele_conn[e, 2]],
-                    U[2*mesh.ele_conn[e, 2]+1],
-                    U[2*mesh.ele_conn[e, 3]],
-                    U[2*mesh.ele_conn[e, 3]+1],
-                ])
-
-            self.pEle[:, e] = (np.dot(self.K[:, :, e], uEle) -
-                               self.P0q[:, e])
-
-
-
-    def traction(self, traction):
-        """Apply Neumann BC.
-
-        Computes the integral from the weak form with the boundary term.
-
-        .. note::
-
-            How its done:
-
-            1. Define an array with the Gauss points for each path, each path will
-            have 2 sets of two gauss points. One of the gp is fixed, which indicates
-            that its going over an specific boundary of the element.
-
-            Gauss points are defines as::
-
-                gp = [gp, -1    1st path --> which has 2 possibilities for gp.
-                      1,  gp    2nd path
-                      gp,  1    3rd
-                      -1,  gp]  4th
-
-            2. A loop over the elements on the boundary extracting also the side
-            where the boundary is located on this element.
-
-        .. note::
-
-            Edge elements are necessary because we need to extract the nodes
-            from the connectivity. Then we can create a T for this element.
-
-        Args:
-            traction: Function with the traction and the line where the traction
-                is applied.
-            mesh: Object with the mesh attributes.
-
-        Returns:
-            T: Traction vector with size equals the dof.
-
-        """
-        mesh = self.mesh
-        self.P0t = np.zeros((8, mesh.num_ele))
-
-
-        gp = np.array([[[-1.0/math.sqrt(3), -1.0],
-                        [1.0/math.sqrt(3), -1.0]],
-                       [[1.0, -1.0/math.sqrt(3)],
-                        [1.0, 1.0/math.sqrt(3)]],
-                       [[-1.0/math.sqrt(3), 1.0],
-                        [1.0/math.sqrt(3), 1.0]],
-                       [[-1.0, -1.0/math.sqrt(3)],
-                        [-1.0, 1.0/math.sqrt(3)]]])
-
-        # compute traction for all nodes
-        for l in traction(1,1).keys():
-            if l[0] == 'line':
-                for e, side, line in mesh.boundary_elements:
-                    if line == l[1]:
-                        for w in range(2):
-                            mesh.basisFunction2D(gp[side, w])
-                            mesh.eleJacobian(mesh.nodes_coord[mesh.ele_conn[
-                                                               e, :]])
-
-                            x1_o_e1e2, x2_o_e1e2 = mesh.mapping(e)
-
-                            t = traction(x1_o_e1e2, x2_o_e1e2)
-
-                            dL = mesh.ArchLength[side]
-
-                            self.P0t[0, e] += mesh.phi[0]*t[l][0]*dL
-                            self.P0t[1, e] += mesh.phi[0]*t[l][1]*dL
-                            self.P0t[2, e] += mesh.phi[1]*t[l][0]*dL
-                            self.P0t[3, e] += mesh.phi[1]*t[l][1]*dL
-                            self.P0t[4, e] += mesh.phi[2]*t[l][0]*dL
-                            self.P0t[5, e] += mesh.phi[2]*t[l][1]*dL
-                            self.P0t[6, e] += mesh.phi[3]*t[l][0]*dL
-                            self.P0t[7, e] += mesh.phi[3]*t[l][1]*dL
-
-
-
-            if l[0] == 'nodes' or l[0] == 'node':
-                for n in l[1:]:
-                    for e in range(mesh.num_ele):
-                        if n in mesh.ele_conn[e]:
-                            t = traction(1, 1)
-                            i = np.where(mesh.ele_conn[e]==n)[0][0]
-                            self.P0t[2*i, e] = t[l][0]
-                            self.P0t[2*i+1, e] = t[l][1]
-
-
-    def initial_strain(self, kwargs):
-        """Calculate the nodal equivalent forces due thermal initial strain
-
-        """
-        mesh = self.mesh
-
-        if len(kwargs) != 0:
-            dT = kwargs['initT']
-        else:
-            dT = np.zeros(mesh.num_nodes)
-
-        dTele = dof1value_element(dT, mesh)
-
-        self.P0e = np.zeros((8, mesh.num_ele))
-        self.e0 = np.zeros((3, mesh.num_ele))
-        for e in range(mesh.num_ele):
-            for w in range(4):
-                mesh.basisFunction2D(self.gp[w])
-                mesh.eleJacobian(mesh.nodes_coord[
-                    mesh.ele_conn[e]])
-
-                D = np.array([
-                    [mesh.dphi_xi[0, 0], 0, mesh.dphi_xi[0, 1], 0,
-                    mesh.dphi_xi[0, 2], 0, mesh.dphi_xi[0, 3], 0]
-                             ,
-                    [0, mesh.dphi_xi[1, 0], 0, mesh.dphi_xi[1, 1], 0,
-                    mesh.dphi_xi[1, 2], 0, mesh.dphi_xi[1, 3]]
-                             ,
-                    [mesh.dphi_xi[1, 0], mesh.dphi_xi[0, 0],
-                    mesh.dphi_xi[1, 1], mesh.dphi_xi[0, 1],
-                    mesh.dphi_xi[1, 2], mesh.dphi_xi[0, 2],
-                    mesh.dphi_xi[1, 3], mesh.dphi_xi[0, 3]]])
-
-                NtT = np.dot(mesh.phi, dTele[:, e])
-
-                alpha = np.array([1e-6, 1e-6, 0.0])
-
-                self.e0[:, e] += alpha*NtT
-
-                DtC = np.dot(np.transpose(D), self.C)
-
-                self.P0e[:, e] += np.dot(DtC, alpha)*NtT*mesh.detJac
-
-
-                
-
-                
-
-def dof1value_element(V, mesh):
-    """Convert a nodal 1 dof value into a element value doing the mean
-    between nodes.
-
-    :param dT:
-    :param mesh:
-    :return:
-    """
-    Vele = np.zeros((4, mesh.num_ele))
-    for e in range(mesh.num_ele):
-        Vele[:, e] = np.array([V[mesh.ele_conn[e, 0]],
-                V[mesh.ele_conn[e, 1]],
-                V[mesh.ele_conn[e, 2]],
-                V[mesh.ele_conn[e, 3]]])
-
-    return Vele
+   
