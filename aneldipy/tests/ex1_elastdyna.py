@@ -1,7 +1,5 @@
-__author__ = 'Nasser'
-
 import numpy as np
-import elastodynamics2d
+import aneldipy.elastodynamics2d as ealstodynamics
 
 meshName = 'patch'
 
@@ -27,27 +25,27 @@ def displacement_imposed(x1, x2):
     }
 
 elastodynamics2d.solver(meshName,
-                    material,
-                    body_forces,
-                    traction_imposed,
-                    displacement_imposed,
-                    plotUndeformed={'Domain':True,
-                                  'Elements':True,
-                                  'NodeLabel':True,
-                                  'EdgesLabel':False,
-                                  'ElementLabel':False,
-                                  'SurfaceLabel':False},
-                    plotStress={'s11':False,
-                              's22':False,
-                              's12':False,
-                              'sPmax':False,
-                              'sPmin':False},
-                    plotDeformed={'DomainUndeformed':False,
-                                'ElementsUndeformed':False,
-                                'DomainDeformed':False,
-                                'ElementsDeformed':False,
-                                'DeformationMagf': 100},
-                    printReport={'U':False,
-                                 'stress':False,
-                                 'strain':False}
-                    )
+                        material,
+                        body_forces,
+                        traction_imposed,
+                        displacement_imposed,
+                        plotUndeformed={'Domain':True,
+                                      'Elements':True,
+                                      'NodeLabel':True,
+                                      'EdgesLabel':False,
+                                      'ElementLabel':False,
+                                      'SurfaceLabel':False},
+                        plotStress={'s11':False,
+                                  's22':False,
+                                  's12':False,
+                                  'sPmax':False,
+                                  'sPmin':False},
+                        plotDeformed={'DomainUndeformed':False,
+                                    'ElementsUndeformed':False,
+                                    'DomainDeformed':False,
+                                    'ElementsDeformed':False,
+                                    'DeformationMagf': 100},
+                        printReport={'U':False,
+                                     'stress':False,
+                                     'strain':False}
+                        )
