@@ -30,6 +30,9 @@ def solver(meshName, material, body_forces, traction_imposed,
 
     K = assemble2dof.globalMatrix(ele.K, mesh)
 
+    M = assemble2dof.globalMatrix(ele.M, mesh)
+    print(no.size(M), M)
+
     P0q = assemble2dof.globalVector(ele.P0q, mesh)
 
     P0t = boundaryconditions2dof.neumann(mesh, traction_imposed)
