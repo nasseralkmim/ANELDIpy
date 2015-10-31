@@ -11,114 +11,116 @@ import plotter as plotter
 import boundaryconditions2dof as boundaryconditions2dof
 import processing as processing
 
-def solver(meshName, material, body_forces, traction_imposed,
-           displacement_imposed,
-           plotUndeformed, plotStress, plotDeformed, printReport, **kwargs):
 
-    mesh = gmsh.parse(meshName)
+def solver(mesh_name, material, body_forces, traction_imposed,
+           displacement_imposed,
+           plot_undeformed, plot_stress, plot_deformed, print_report, **kwargs):
+
+    mesh = gmsh.parse(mesh_name)
 
     ele = element2dof.Matrices(mesh)
 
     s = mesh.surfaces
-    matDic = {s[i]: material[j] for i, j in enumerate(material)}
+    mat_dic = {s[i]: material[j] for i, j in enumerate(material)}
 
-    ele.stiffness(matDic)
+    ele.stiffness(mat_dic)
 
     ele.body_forces(body_forces)
 
-    ele.mass(matDic)
+    ele.mass(mat_dic)
 
-    K = assemble2dof.globalMatrix(ele.K, mesh)
+    k = assemble2dof.globalMatrix(ele.K, mesh)
 
-    M = assemble2dof.globalMatrix(ele.M, mesh)
-    print(no.size(M), M)
+    m = assemble2dof.globalMatrix(ele.M, mesh)
+    print(np.size(m), m)
 
-    P0q = assemble2dof.globalVector(ele.P0q, mesh)
+    p0q = assemble2dof.globalVector(ele.P0q, mesh)
 
-    P0t = boundaryconditions2dof.neumann(mesh, traction_imposed)
+    p0t = boundaryconditions2dof.neumann(mesh, traction_imposed)
 
-    P0 = P0q + P0t 
+    p0 = p0q + p0t
 
-    Km, P0m = boundaryconditions2dof.dirichlet(K, P0, mesh,displacement_imposed)
+    km, p0m = boundaryconditions2dof.dirichlet(k, p0, mesh,displacement_imposed)
 
-    Ks = sparse.csc_matrix(Km)
+    ks = sparse.csc_matrix(km)
 
-    U = spsolve(Ks, P0m)
+    u = spsolve(ks, p0m)
 
-    if printReport['U'] == True:
-        processing.print_dof_values(U, mesh, 'Displacement')
+    if print_report['U'] == True:
+        processing.print_dof_values(u, mesh, 'Displacement')
 
-    ele.nodal_forces(U)
-    Pnode = assemble2dof.globalVector(ele.pEle, mesh)
+    ele.nodal_forces(u)
+    p_node = assemble2dof.globalVector(ele.pEle, mesh)
 
-    sNode, sEle, eEle = processing.stress_recovery_simple2(mesh, U, matDic,
+    sNode, sEle, eEle = processing.stress_recovery_simple2(mesh, u, mat_dic,
                                                            ele.e0)
     print(mesh.num_ele)
-    if printReport['stress'] == True:
+    if print_report['stress'] == True:
         processing.print_ele_values(sEle, mesh, 'Stress')
 
-    if printReport['strain'] == True:
+    if print_report['strain'] == True:
         processing.print_ele_values(eEle, mesh, 'Strain')
 
     principal_max = processing.principal_stress_max(sNode[0], sNode[1], sNode[2])
     principal_min= processing.principal_stress_min(sNode[0], sNode[1], sNode[2])
 
     dpi = 90
-    magf = plotDeformed['DeformationMagf']
+    magnification = plot_deformed['DeformationMagf']
 
-    #PLOTTER CONTOUR MAPS
-    if plotStress['s11'] == True:
+    # PLOTTER CONTOUR MAPS
+    if plot_stress['s11'] == True:
         plotter.tricontourf(sNode[0]/10**3, mesh,
-                                 'Stress 11 (kPa)','spring', dpi)
+                            'Stress 11 (kPa)', 'spring', dpi)
 
-    if plotStress['s22'] == True:
+    if plot_stress['s22'] == True:
         plotter.tricontourf(sNode[1]/10**3, mesh,
-                                 'Stress 22 (kPa)','cool', dpi)
+                            'Stress 22 (kPa)', 'cool', dpi)
 
-    if plotStress['s12'] == True:
+    if plot_stress['s12'] == True:
         plotter.tricontourf(sNode[2]/10**3, mesh,
-                                 'Stress 12 (kPa)','hsv', dpi)
+                            'Stress 12 (kPa)', 'hsv', dpi)
 
-    if plotStress['sPmax'] == True:
+    if plot_stress['sPmax'] == True:
         plotter.tricontourf(principal_max/10**3, mesh,
-                                 'Stress Principal Max (kPa)','autumn', dpi)
+                            'Stress Principal Max (kPa)', 'autumn', dpi)
 
-    if plotStress['sPmin'] == True:
+    if plot_stress['sPmin'] == True:
         plotter.tricontourf(principal_min/10**3, mesh,
-                                 'Stress Principal min (kPa)','winter', dpi)
+                            'Stress Principal min (kPa)', 'winter', dpi)
 
-    #PLOTTER DRAW UNDEFORMED SHAPE, ELEMENTS, LABELS, BC
-    if plotUndeformed['Domain'] == True:
+    # PLOTTER DRAW UNDEFORMED SHAPE, ELEMENTS, LABELS, BC
+    if plot_undeformed['Domain'] == True:
         plotter.draw_domain(mesh, 'Case Study', dpi, 'k')
 
-    if plotUndeformed['Elements'] == True:
+    if plot_undeformed['Elements'] == True:
         plotter.draw_elements(mesh, 'Case Study', dpi, 'k')
 
-    if plotUndeformed['ElementLabel'] == True:
-        plotter.draw_elements_label(mesh, 'Case Study',dpi)
+    if plot_undeformed['ElementLabel'] == True:
+        plotter.draw_elements_label(mesh, 'Case Study', dpi)
 
-    if plotUndeformed['EdgesLabel'] == True:
-        plotter.draw_edges_label(mesh, 'Case Study',dpi)
+    if plot_undeformed['EdgesLabel'] == True:
+        plotter.draw_edges_label(mesh, 'Case Study', dpi)
 
-    if plotUndeformed['NodeLabel'] == True:
-        plotter.draw_nodes_label(mesh, 'Case Study',dpi)
+    if plot_undeformed['NodeLabel'] == True:
+        plotter.draw_nodes_label(mesh, 'Case Study', dpi)
 
-    if plotUndeformed['SurfaceLabel'] == True:
+    if plot_undeformed['SurfaceLabel'] == True:
         plotter.draw_surface_label(mesh, 'Case Study', dpi)
 
 
-        #PLOTTER DEFORMED SHAPE
-    if plotDeformed['DomainUndeformed'] == True:
+    # PLOTTER DEFORMED SHAPE
+    if plot_deformed['DomainUndeformed'] == True:
         plotter.draw_domain(mesh, 'Deformed Shape', dpi, 'SteelBlue')
 
-    if plotDeformed['ElementsUndeformed'] == True:
+    if plot_deformed['ElementsUndeformed'] == True:
         plotter.draw_elements(mesh, 'Deformed Shape', dpi, 'SteelBlue')
 
-    if plotDeformed['DomainDeformed'] == True:
-        plotter.draw_deformed_domain(mesh, U, 'Deformed Shape', dpi, magf, 'Tomato')
+    if plot_deformed['DomainDeformed'] == True:
+        plotter.draw_deformed_domain(mesh, u, 'Deformed Shape', dpi,
+                                     magnification, 'Tomato')
 
-    if plotDeformed['ElementsDeformed'] == True:
-        plotter.draw_deformed_elements(mesh, U, 'Deformed Shape', dpi, magf,
-                                       'Tomato', 1)
+    if plot_deformed['ElementsDeformed'] == True:
+        plotter.draw_deformed_elements(mesh, u, 'Deformed Shape', dpi,
+                                       magnification, 'Tomato', 1)
 
     plt.show()
