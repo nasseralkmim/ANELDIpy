@@ -84,6 +84,7 @@ def stiffness(mesh, material):
 
                     k_ele[:, :, e] += (np.dot(np.transpose(b),
                                               cb) * mesh.detJac)
+        return k_ele
 
 
 def body_forces(mesh, q):

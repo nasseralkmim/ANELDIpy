@@ -1,20 +1,10 @@
 import aneldipy.plotter as plotter
 import matplotlib.pyplot as plt
-import aneldipy.processing as processing
 
 
-def data(plot_stress, plot_deformed, plot_undeformed,
-         print_report, mesh, s_ele, e_ele, s_node,
-         principal_max, principal_min, u):
 
-    if print_report['U'] is True:
-        processing.print_dof_values(u, mesh, 'Displacement')
-
-    if print_report['stress'] is True:
-        processing.print_ele_values(s_ele, mesh, 'Stress')
-
-    if print_report['strain'] is True:
-        processing.print_ele_values(e_ele, mesh, 'Strain')
+def data(plot_stress, plot_deformed, plot_undeformed, mesh, s_ele, e_ele,
+         s_node, principal_max, principal_min, u):
 
     dpi = 90
     magnification = plot_deformed['DeformationMagf']

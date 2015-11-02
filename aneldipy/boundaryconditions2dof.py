@@ -1,9 +1,6 @@
-__author__ = 'Nasser'
 import numpy as np
-import elflab.assemble2dof as assemble2dof
-from scipy import sparse
+import aneldipy.assemble2dof as assemble2dof
 import math
-from numba import jit
 
 
 def dirichlet(K, F, mesh, displacement):
@@ -63,7 +60,7 @@ def dirichlet(K, F, mesh, displacement):
                     rx = displacement(1, 1)[line][0]
                     ry = displacement(1, 1)[line][1]
 
-                    #nodes indexes on the element boundary line
+                    # nodes indexes on the element boundary line
                     n1 = mesh.boundary_nodes[n, 1]
                     n2 = mesh.boundary_nodes[n, 2]
 
@@ -74,7 +71,6 @@ def dirichlet(K, F, mesh, displacement):
                     d2 = displacement(
                         mesh.nodes_coord[n2, 0],
                         mesh.nodes_coord[n2, 1])
-
 
                     if rx != 'free':
                         K[2*n1, :] = 0.0
@@ -91,7 +87,6 @@ def dirichlet(K, F, mesh, displacement):
                         K[2*n2+1, 2*n2+1] =1.0
                         F[2*n1+1] = d1[line][1]
                         F[2*n2+1] = d2[line][1]
-
 
         if line[0] == 'nodes' or line[0] == 'node':
 
@@ -167,7 +162,6 @@ def neumann(mesh, traction):
     """
     Tele = np.zeros((8, mesh.num_ele))
 
-
     gp = np.array([[[-1.0/math.sqrt(3), -1.0],
                     [1.0/math.sqrt(3), -1.0]],
                    [[1.0, -1.0/math.sqrt(3)],
@@ -176,7 +170,6 @@ def neumann(mesh, traction):
                     [1.0/math.sqrt(3), 1.0]],
                    [[-1.0, -1.0/math.sqrt(3)],
                     [-1.0, 1.0/math.sqrt(3)]]])
-
 
     for line in traction(1,1).keys():
         if line[0] == 'line':
@@ -200,8 +193,7 @@ def neumann(mesh, traction):
                         Tele[6, ele] += mesh.phi[3]*t[line][0]*dL
                         Tele[7, ele] += mesh.phi[3]*t[line][1]*dL
 
-
-    T = assemble2dof.globalVector(Tele, mesh)
+    T = assemble2dof.global_vector(Tele, mesh)
 
     for n in traction(1, 1).keys():
         if n[0] == 'node':
@@ -212,42 +204,3 @@ def neumann(mesh, traction):
     return T
 
 
-def dirichlet2(mesh, displacement, K):
-    """
-
-    :param K:
-    :param F:
-    :param mesh:
-    :param displacement:
-    :return:
-    """
-    # build initial displacement vector
-    U0 = np.zeros(mesh.num_nodes*2)
-
-    for l in displacement(1, 1).keys():
-        if l[0] == 'nodes' or l[0] == 'node':
-            for n in l[1:]:
-                u0 = displacement(1, 1)
-                U0[2*n] = u0[l][0]
-                U0[2*n+1] = u0[l][1]
-
-    P0u = np.dot(K, U0)
-
-    return P0u, U0
-
-
-def dirichlet3(mesh, displacement):
-    u0Ele = np.zeros((8, mesh.num_ele))
-
-
-    for l in displacement(1, 1).keys():
-        if l[0] == 'nodes' or l[0] == 'node':
-            for n in l[1:]:
-                for e in range(mesh.num_ele):
-                    if n in mesh.ele_conn[e]:
-                        u0 = displacement(1, 1)
-                        i = np.where(mesh.ele_conn[e]==n)[0][0]
-                        u0Ele[2*i, e] = u0[l][0]
-                        u0Ele[2*i+1, e] = u0[l][1]
-
-    return u0Ele

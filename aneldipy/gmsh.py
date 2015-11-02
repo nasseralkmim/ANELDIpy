@@ -73,7 +73,7 @@ class parse:
 
     """
     def __init__(self, filename):
-        path = os.path.join("..\mesh", filename+'.geo')
+        path = os.path.join(filename+'.geo')
         geometry_feeder = open(path, 'r')
 
         surfaces = []
@@ -83,7 +83,7 @@ class parse:
         self.physicalSurface = {}
         self.lineLoop = {}
         self.line = {}
-        #counters for line tag
+        # counters for line tag
         i = 0
         for txtLine in geometry_feeder:
             txtLine = txtLine.strip()
@@ -103,7 +103,6 @@ class parse:
                 number = int(t[t.find('{')+1:t.find('}')]) - 1
                 self.physicalLine[plTag] = number
 
-
             if txtLine.startswith('Physical Surface('):
                 surfaces.append(
                     int(txtLine[txtLine.find('(')+1:txtLine.find(')')]) - 1
@@ -121,7 +120,7 @@ class parse:
 
                 self.line[lTag] = [nf, nl]
 
-            #line loop tag, line1 line2 ....
+            # line loop tag, line1 line2 ....
             if txtLine.startswith('Line Loop('):
                 lpTag = int(txtLine[txtLine.find('(')+1:txtLine.find(')')])
                 lpList = []
@@ -163,8 +162,7 @@ class parse:
         self.boundaryLines = np.asarray(boundaryLines)
         self.surfaces = np.asarray(surfaces)
 
-
-        path2 = os.path.join("..\mesh", filename+'.msh')
+        path2 = os.path.join(filename+'.msh')
         mesh_feeder = open(path2, 'r')
 
         nodes_coord = []
@@ -196,8 +194,6 @@ class parse:
                 boundary_nodes.append([int(columns[4]) - 1,
                                        int(columns[5]) - 1,
                                        int(columns[6]) - 1])
-
-
 
         self.boundary_nodes = np.asarray(boundary_nodes)
         self.nodes_coord = np.asarray(nodes_coord)
@@ -243,7 +239,6 @@ class parse:
 
         self.gmsh = 1.0
 
-
     def basisFunction2D(self, natural_coord):
         """Create the basis function and its properties.
 
@@ -288,7 +283,6 @@ class parse:
         self.dphi_ei[0, :] = 0.5 * self.chi[:, 0] * e2_term
         self.dphi_ei[1, :] = 0.5 * self.chi[:, 1] * e1_term
 
-
     def mapping(self, e):
         """maps from cartesian to isoparametric.
 
@@ -307,7 +301,6 @@ class parse:
             self.phi[:], self.nodes_coord[self.ele_conn[e, :], 1])
 
         return x1_o_e1e2, x2_o_e1e2
-
 
     def eleJacobian(self, element_nodes_coord):
         """Creates the Jacobian matrix of the mapping between an element
