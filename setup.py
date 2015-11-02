@@ -10,8 +10,8 @@ config = {
     'download_url': 'Where to download it.',
     'author_email': 'nasser.alkmim@gmail.com',
     'version': '0.1',
-    'install_requires': ['nose'],
-    'packages': ['ANELDIpy'],
+    'install_requires': ['nose', 'numpy', 'scipy'],
+    'packages': ['aneldipy', 'tests'],
     'scripts': [],
     'name': 'aneldipy'
 }
