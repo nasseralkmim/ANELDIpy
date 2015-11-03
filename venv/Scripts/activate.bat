@@ -1,5 +1,5 @@
 @echo off
-set "VIRTUAL_ENV=C:\Users\Nasser\OneDrive\ANELDIpy\venv"
+set "VIRTUAL_ENV=C:\Users\Nasser\OneDrive\eldypy\venv"
 
 if not defined PROMPT (
     set "PROMPT=$P$G"

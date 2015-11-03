@@ -26,11 +26,21 @@ def displacement_imposed(x1, x2):
         ('node', 1): ['free', 0.0]
     }
 
+
+period = 10.0
+
+steps = 3
+
+u0 = 0.0
+
+v0 = 0.0
+
 elastodynamics2d.solver(mesh_name,
                         material,
                         body_forces,
                         traction_imposed,
                         displacement_imposed,
+                        period, steps, u0, v0,
                         plot_undeformed={'Domain': True,
                                          'Elements': True,
                                          'NodeLabel': True,
@@ -48,3 +58,4 @@ elastodynamics2d.solver(mesh_name,
                                        'ElementsDeformed': True,
                                        'DeformationMagf': 100},
                         )
+

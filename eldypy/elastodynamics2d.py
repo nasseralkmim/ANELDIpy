@@ -1,16 +1,16 @@
 from scipy.sparse.linalg import spsolve
 from scipy import sparse
-import eldypy.gmsh as gmsh
-import eldypy.element2dof as element2dof
-import eldypy.assemble2dof as assemble2dof
-import eldypy.boundaryconditions2dof as boundaryconditions2dof
-import eldypy.processing as processing
-import eldypy.output as output
-
+from eldypy import gmsh
+from eldypy import element2dof
+from eldypy import assemble2dof
+from eldypy import boundaryconditions2dof
+from eldypy import processing
+from eldypy import output
+from eldypy import explicitfd
 
 def solver(mesh_name, material, body_forces, traction_imposed,
-           displacement_imposed, plot_undeformed, plot_stress,
-           plot_deformed):
+           displacement_imposed, period, steps, u0, v0,
+           plot_undeformed, plot_stress, plot_deformed):
 
     mesh = gmsh.parse(mesh_name)
 
@@ -36,6 +36,8 @@ def solver(mesh_name, material, body_forces, traction_imposed,
     km, p0m = boundaryconditions2dof.dirichlet(k, p0, mesh,
                                                displacement_imposed)
 
+    #explicitfd.scheme(period, steps, u0, v0, m, p0, k)
+    
     ks = sparse.csc_matrix(km)
 
     u = spsolve(ks, p0m)
@@ -48,4 +50,4 @@ def solver(mesh_name, material, body_forces, traction_imposed,
                                                     s_node[2])
 
     output.data(plot_stress, plot_deformed, plot_undeformed, mesh, s_ele,
-                e_ele, s_node, principal_max, principal_min, u)
+               e_ele, s_node, principal_max, principal_min, u)

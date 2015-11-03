@@ -10,7 +10,7 @@ config = {
     'download_url': 'Where to download it.',
     'author_email': 'nasser.alkmim@gmail.com',
     'version': '0.1',
-    'install_requires': ['nose', 'numpy', 'scipy'],
+    'install_requires': ['nose', 'numpy', 'scipy', 'matplotlib'],
     'packages': ['eldypy', 'tests'],
     'scripts': [],
     'name': 'eldypy'

@@ -2,7 +2,6 @@ import eldypy.plotter as plotter
 import matplotlib.pyplot as plt
 
 
-
 def data(plot_stress, plot_deformed, plot_undeformed, mesh, s_ele, e_ele,
          s_node, principal_max, principal_min, u):
 
