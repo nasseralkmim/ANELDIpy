@@ -1,5 +1,5 @@
 import numpy as np
-from aneldipy import elastodynamics2d
+from eldypy import elastodynamics2d
 
 mesh_name = 'patch'
 

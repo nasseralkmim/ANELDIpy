@@ -1,4 +1,4 @@
-import aneldipy.plotter as plotter
+import eldypy.plotter as plotter
 import matplotlib.pyplot as plt
 
 

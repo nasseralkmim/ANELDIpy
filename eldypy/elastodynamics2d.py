@@ -1,11 +1,11 @@
 from scipy.sparse.linalg import spsolve
 from scipy import sparse
-import aneldipy.gmsh as gmsh
-import aneldipy.element2dof as element2dof
-import aneldipy.assemble2dof as assemble2dof
-import aneldipy.boundaryconditions2dof as boundaryconditions2dof
-import aneldipy.processing as processing
-import aneldipy.output as output
+import eldypy.gmsh as gmsh
+import eldypy.element2dof as element2dof
+import eldypy.assemble2dof as assemble2dof
+import eldypy.boundaryconditions2dof as boundaryconditions2dof
+import eldypy.processing as processing
+import eldypy.output as output
 
 
 def solver(mesh_name, material, body_forces, traction_imposed,

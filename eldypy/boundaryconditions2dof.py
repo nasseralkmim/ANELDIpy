@@ -1,5 +1,5 @@
 import numpy as np
-import aneldipy.assemble2dof as assemble2dof
+import eldypy.assemble2dof as assemble2dof
 import math
 
 

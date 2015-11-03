@@ -11,9 +11,9 @@ config = {
     'author_email': 'nasser.alkmim@gmail.com',
     'version': '0.1',
     'install_requires': ['nose', 'numpy', 'scipy'],
-    'packages': ['aneldipy', 'tests'],
+    'packages': ['eldypy', 'tests'],
     'scripts': [],
-    'name': 'aneldipy'
+    'name': 'eldypy'
 }
 
 setup(**config)
