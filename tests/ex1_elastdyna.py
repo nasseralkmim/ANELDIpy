@@ -27,12 +27,9 @@ def displacement_imposed(x1, x2):
     }
 
 
-period = 10.0
-
-steps = 3
-
+period = 0.1
+steps = 300
 u0 = 0.0
-
 v0 = 0.0
 
 elastodynamics2d.solver(mesh_name,
@@ -58,4 +55,3 @@ elastodynamics2d.solver(mesh_name,
                                        'ElementsDeformed': True,
                                        'DeformationMagf': 100},
                         )
-

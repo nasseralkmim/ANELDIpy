@@ -1,5 +1,6 @@
 import eldypy.plotter as plotter
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
 def data(plot_stress, plot_deformed, plot_undeformed, mesh, s_ele, e_ele,
