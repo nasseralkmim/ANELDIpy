@@ -9,13 +9,13 @@ material = {'E-nu-rho': [1000.0, 0.2, 1.0]}
 def body_forces(x1, x2):
     return np.array([
         0.0,
-        0.0,
+        -1.0,
     ])
 
 
 def traction_imposed(x1, x2):
     return {
-        ('line', 3): [-1.0, 0.0],
+        ('line', 3): [-1., 0.0],
         ('line', 1): [1.0, 0.0]
     }
 
@@ -28,7 +28,7 @@ def displacement_imposed(x1, x2):
 
 
 period = 0.1
-steps = 300
+steps = 30
 u0 = 0.0
 v0 = 0.0
 

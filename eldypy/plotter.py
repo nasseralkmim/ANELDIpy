@@ -528,3 +528,74 @@ def tricontourf(a, mesh, name, cmap, dpi):
     #plt.axes().autoscale_view(True, True, True)
 
     plt.draw()
+
+
+def tricontourf2(a, mesh, name, cmap, dpi):
+    """Plot contour with the tricoutour function and the boundary line with
+    the boundary node.
+
+    """
+    c = mesh.nodes_coord
+    bn = mesh.boundary_nodes
+
+    xx, yy, zz = c[:, 0], c[:, 1], a
+
+    ccx = np.append(c[bn[:, 1], 0], c[bn[0, 1], 0])
+    ccy = np.append(c[bn[:, 1], 1], c[bn[0, 1], 1])
+
+    triangles = []
+    for n1, n2, n3, n4 in mesh.ele_conn:
+        triangles.append([n1, n2, n3])
+        triangles.append([n1, n3, n4])
+
+    triangles = np.asarray(triangles)
+
+    lev = 20
+
+    CS2 = plt.tricontourf(xx, yy, triangles, zz, lev,
+                              origin='lower',
+                          cmap=cmap, antialiased=True)
+
+    '''
+
+    #remove label and tick of axis
+    plt.gca().axes.get_xaxis().set_visible(True)
+    plt.gca().axes.get_yaxis().set_visible(True)
+
+    #remove background and rectangular frame
+    fig.patch.set_visible(False)
+    ax1.patch.set_visible(False)
+    ax1.axis('off')
+
+    #plot a solid line in the boundary
+    plt.plot(ccx , ccy, '-k')
+    #plt.scatter(xx, yy, c=zz)
+    plt.xlabel(r'$x$', fontsize=14)
+    plt.ylabel(r'$y$', fontsize=14)
+
+    #adjusts the contour color bar depending on the aspect ratio of domain
+    if max(yy) < max(xx)/2.5:
+        pos = 'bottom'
+        pad = 0.6
+    else:
+        pos = 'right'
+        pad = 0.3
+
+    divider = make_axes_locatable(ax1)
+    cax = divider.append_axes(pos, size=0.2, pad=pad)
+
+    if max(yy) < max(xx)/2.5:
+        ori = 'horizontal'
+    else:
+        ori = 'vertical'
+        '''
+    #cbar = plt.colorbar(CS2, cax=cax, orientation=ori)
+    #cbar.set_label(name, fontsize=12)
+
+
+    # plt.savefig('1.png', transparent=True, dpi=300)
+    #plt.axes().set_aspect('equal')
+    #plt.axes().autoscale_view(True, True, True)
+
+    #plt.draw()
+    return CS2
